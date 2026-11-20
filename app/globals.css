@@ -24,6 +24,32 @@ body {
   -webkit-backface-visibility: hidden;
 }
 
+@keyframes float-blob-1 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(35px, 25px, 0) scale(1.06);
+  }
+}
+
+@keyframes float-blob-2 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-35px, -25px, 0) scale(1.05);
+  }
+}
+
+.animate-blob-1 {
+  animation: float-blob-1 18s ease-in-out infinite;
+}
+
+.animate-blob-2 {
+  animation: float-blob-2 22s ease-in-out infinite;
+}
+
 html.dark body {
   background-color: #07050D;
   color: #F4EDFF;
@@ -134,6 +160,7 @@ html.dark .liquid-glass::before {
    ======================================================== */
 
 .apple-dock-capsule {
+  touch-action: none;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.86) 0%,
@@ -154,6 +181,7 @@ html.dark .liquid-glass::before {
 }
 
 html.dark .apple-dock-capsule {
+  touch-action: none;
   background: linear-gradient(
     135deg,
     rgba(36, 26, 58, 0.86) 0%,
@@ -249,19 +277,21 @@ html.dark .iphone-shimmer-text {
   animation: iphone-shimmer 2.2s infinite linear;
 }
 
-/* Subtle texture overlay */
-.grain::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 60;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='.8' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-}
+/* Subtle texture overlay - disabled on touch/mobile for maximum 120Hz performance */
+@media (min-width: 1024px) and (hover: hover) {
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='.8' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
 
-html.dark .grain::after {
-  opacity: 0.025;
+  html.dark .grain::after {
+    opacity: 0.025;
+  }
 }
 
 /* Outline / stroke text with reliable fallback */

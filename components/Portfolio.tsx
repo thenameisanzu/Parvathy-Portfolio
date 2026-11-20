@@ -200,11 +200,11 @@ function Reveal({
   return (
     <motion.div
       className={`gpu-layer ${className}`}
-      initial={{ opacity: 0, y: 35, filter: "blur(18px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.8, ease, delay }}
-      style={{ willChange: "transform, opacity, filter" }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-20px" }}
+      transition={{ duration: 0.55, ease, delay }}
+      style={{ willChange: "transform, opacity" }}
     >
       {children}
     </motion.div>
@@ -221,9 +221,9 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="relative mx-auto max-w-[1500px] px-4 py-20 sm:px-8 md:px-12 md:py-32 lg:px-16">
-      <Reveal className="mb-8 flex items-center gap-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-ink-muted dark:text-ink-muted-dark">
-        <span className="h-px w-10 sm:w-12 bg-ink/30 dark:bg-ink-dark/30" /> {label}
+    <section id={id} className="relative mx-auto max-w-[1400px] px-4 py-8 sm:px-6 sm:py-12 md:px-10 md:py-14 lg:px-14">
+      <Reveal className="mb-4 sm:mb-6 flex items-center gap-3 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-ink-muted dark:text-ink-muted-dark">
+        <span className="h-px w-8 sm:w-12 bg-ink/30 dark:bg-ink-dark/30" /> {label}
       </Reveal>
       {children}
     </section>
@@ -246,12 +246,17 @@ function SpotlightCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const reduceMotion = useReducedMotion();
+  const [isTouch, setIsTouch] = useState(false);
 
-  const rx = useSpring(useTransform(y, [-0.5, 0.5], [5, -5]), { stiffness: 240, damping: 24 });
-  const ry = useSpring(useTransform(x, [-0.5, 0.5], [-5, 5]), { stiffness: 240, damping: 24 });
+  useEffect(() => {
+    setIsTouch(window.matchMedia("(hover: none)").matches);
+  }, []);
+
+  const rx = useSpring(useTransform(y, [-0.5, 0.5], [4, -4]), { stiffness: 220, damping: 24 });
+  const ry = useSpring(useTransform(x, [-0.5, 0.5], [-4, 4]), { stiffness: 220, damping: 24 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    if (isTouch || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
@@ -273,7 +278,7 @@ function SpotlightCard({
       ref={cardRef}
       onClick={onClick}
       className={`liquid-glass group relative overflow-hidden gpu-layer ${className}`}
-      style={reduceMotion ? {} : { rotateX: rx, rotateY: ry, transformPerspective: 1000, willChange: "transform" }}
+      style={reduceMotion || isTouch ? {} : { rotateX: rx, rotateY: ry, transformPerspective: 1000 }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -284,7 +289,7 @@ function SpotlightCard({
           background: useTransform(
             [mouseX, mouseY],
             ([cx, cy]) =>
-              `radial-gradient(450px circle at ${cx}px ${cy}px, rgba(190, 160, 255, 0.24), transparent 80%)`
+              `radial-gradient(400px circle at ${cx}px ${cy}px, rgba(190, 160, 255, 0.22), transparent 75%)`
           ),
         }}
       />
@@ -299,7 +304,7 @@ function useActiveSection(ids: string[]) {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 250;
+      const scrollPosition = window.scrollY + 200;
       for (let i = ids.length - 1; i >= 0; i--) {
         const el = document.getElementById(ids[i]);
         if (el && el.offsetTop <= scrollPosition) {
@@ -317,64 +322,35 @@ function useActiveSection(ids: string[]) {
   return active;
 }
 
-/* ---------------- Ambient Background & Effects with Multi-Tier Scroll Blur Parallax ---------------- */
+/* ---------------- Ambient Background with GPU-Accelerated CSS Aurora ---------------- */
 function Background() {
   const reduceMotion = useReducedMotion();
-  const { scrollY } = useScroll();
 
-  // Distinct parallax speed curves for genuine visionOS spatial depth
-  const p1 = useTransform(scrollY, [0, 4000], [0, -340]);
-  const p2 = useTransform(scrollY, [0, 4000], [0, -180]);
-  const p3 = useTransform(scrollY, [0, 4000], [0, -420]);
-  const p4 = useTransform(scrollY, [0, 4000], [0, -120]);
-
-  const blobs = [
-    {
-      c: "radial-gradient(circle, rgba(201,184,245,0.82) 0%, rgba(201,184,245,0) 70%)",
-      s: "h-[68vmax] w-[68vmax] -left-[20vmax] -top-[20vmax]",
-      x: [0, 80, 0],
-      y: [0, 60, 0],
-      p: p1,
-    },
-    {
-      c: "radial-gradient(circle, rgba(249,198,212,0.78) 0%, rgba(249,198,212,0) 70%)",
-      s: "h-[58vmax] w-[58vmax] -right-[15vmax] top-[18vh]",
-      x: [0, -70, 0],
-      y: [0, 80, 0],
-      p: p2,
-    },
-    {
-      c: "radial-gradient(circle, rgba(217,228,255,0.8) 0%, rgba(217,228,255,0) 70%)",
-      s: "h-[54vmax] w-[54vmax] left-[10vw] top-[60vh]",
-      x: [0, 60, 0],
-      y: [0, -60, 0],
-      p: p3,
-    },
-    {
-      c: "radial-gradient(circle, rgba(255,220,235,0.7) 0%, rgba(255,220,235,0) 70%)",
-      s: "h-[48vmax] w-[48vmax] right-[8vw] -bottom-[12vmax]",
-      x: [0, -50, 0],
-      y: [0, 50, 0],
-      p: p4,
-    },
-  ];
+  if (reduceMotion) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      {blobs.map((b, i) => (
-        <motion.div
-          key={i}
-          style={reduceMotion ? {} : { y: b.p }}
-          className="absolute inset-0"
-        >
-          <motion.div
-            className={`absolute rounded-full blur-[90px] sm:blur-[120px] md:blur-[140px] gpu-layer ${b.s}`}
-            style={{ background: b.c }}
-            animate={reduceMotion ? {} : { x: b.x, y: b.y, scale: [1, 1.14, 1] }}
-            transition={{ duration: 16 + i * 4, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </motion.div>
-      ))}
+      {/* Primary Lavender Blob */}
+      <div
+        className="animate-blob-1 absolute -left-[15vmax] -top-[15vmax] h-[65vmax] w-[65vmax] rounded-full blur-[80px] sm:blur-[100px] gpu-layer opacity-80 dark:opacity-60"
+        style={{
+          background: "radial-gradient(circle, rgba(201,184,245,0.7) 0%, rgba(201,184,245,0) 70%)",
+        }}
+      />
+      {/* Secondary Blush Pink Blob */}
+      <div
+        className="animate-blob-2 absolute -right-[10vmax] top-[25vh] h-[55vmax] w-[55vmax] rounded-full blur-[80px] sm:blur-[100px] gpu-layer opacity-75 dark:opacity-50"
+        style={{
+          background: "radial-gradient(circle, rgba(249,198,212,0.65) 0%, rgba(249,198,212,0) 70%)",
+        }}
+      />
+      {/* Soft Bottom Fill Blob */}
+      <div
+        className="absolute left-[15vw] -bottom-[15vmax] h-[45vmax] w-[45vmax] rounded-full blur-[90px] gpu-layer opacity-60 dark:opacity-40"
+        style={{
+          background: "radial-gradient(circle, rgba(217,228,255,0.7) 0%, rgba(217,228,255,0) 70%)",
+        }}
+      />
     </div>
   );
 }
@@ -388,6 +364,8 @@ function CursorGlow() {
 
   useEffect(() => {
     if (reduceMotion) return;
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) return;
+
     const m = (e: MouseEvent) => {
       x.set(e.clientX - 160);
       y.set(e.clientY - 160);
@@ -413,48 +391,54 @@ function CursorGlow() {
 
 /* ========================================================
    Authentic Minimal Apple Dock Item
-   (Pure minimal glyph with responsive touch/pointer magnification)
+   (Zero-Reflow Distance Math + Touch Slide Support)
    ======================================================== */
 function AppleDockItem({
   id,
   label,
   Icon,
   isActive,
+  isTouchHovered,
   mouseX,
+  itemCenter,
+  onSelect,
 }: {
   id: string;
   label: string;
   Icon: LucideIcon;
   isActive: boolean;
+  isTouchHovered: boolean;
   mouseX: MotionValue<number>;
+  itemCenter: number;
+  onSelect: (id: string) => void;
 }) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isMouseHovered, setIsMouseHovered] = useState(false);
   const reduceMotion = useReducedMotion();
 
-  // Distance from pointer or touch X coordinate to item center
+  // Instant O(1) distance calculation without layout reflow
   const distance = useTransform(mouseX, (val) => {
-    if (reduceMotion || !ref.current) return 1000;
-    const bounds = ref.current.getBoundingClientRect();
-    return val - (bounds.x + bounds.width / 2);
+    if (reduceMotion || !itemCenter) return 1000;
+    return val - itemCenter;
   });
 
-  // Responsive fish-eye curves (smooth 120Hz spring)
-  const scaleSync = useTransform(distance, [-75, 0, 75], [1, 1.28, 1]);
-  const scale = useSpring(scaleSync, { mass: 0.08, stiffness: 300, damping: 18 });
-
-  const ySync = useTransform(distance, [-75, 0, 75], [0, -8, 0]);
-  const y = useSpring(ySync, { mass: 0.08, stiffness: 300, damping: 18 });
+  const scaleSync = useTransform(distance, [-70, 0, 70], [1, 1.28, 1]);
+  const scale = useSpring(scaleSync, { mass: 0.08, stiffness: 320, damping: 20 });
+  const ySync = useTransform(distance, [-70, 0, 70], [0, -7, 0]);
+  const y = useSpring(ySync, { mass: 0.08, stiffness: 320, damping: 20 });
 
   return (
     <motion.a
-      ref={ref}
+      data-dock-id={id}
       href={`#${id}`}
-      style={reduceMotion ? {} : { scale, y }}
+      style={reduceMotion ? {} : { scale: isTouchHovered ? 1.25 : scale, y: isTouchHovered ? -7 : y }}
       whileTap={{ scale: 0.88 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex h-10 w-10 items-center justify-center rounded-full transition-colors sm:h-12 sm:w-12 gpu-layer"
+      onMouseEnter={() => setIsMouseHovered(true)}
+      onMouseLeave={() => setIsMouseHovered(false)}
+      onClick={(e) => {
+        e.preventDefault();
+        onSelect(id);
+      }}
+      className="group relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full transition-colors select-none gpu-layer"
       aria-label={label}
     >
       {/* Liquid active pill indicator */}
@@ -466,15 +450,15 @@ function AppleDockItem({
         />
       )}
 
-      {/* Floating Apple-Style Tooltip above item on Desktop */}
+      {/* Floating Apple-Style Tooltip */}
       <AnimatePresence>
-        {isHovered && (
+        {(isMouseHovered || isTouchHovered) && (
           <motion.span
-            initial={{ opacity: 0, y: 8, scale: 0.88 }}
+            initial={{ opacity: 0, y: 6, scale: 0.88 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 5, scale: 0.88 }}
-            transition={{ duration: 0.15 }}
-            className="pointer-events-none absolute -top-11 hidden rounded-full border border-white/40 bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-ink shadow-lg backdrop-blur-md dark:border-white/15 dark:bg-night-800/90 dark:text-ink-dark sm:block"
+            exit={{ opacity: 0, y: 4, scale: 0.88 }}
+            transition={{ duration: 0.12 }}
+            className="pointer-events-none absolute -top-10 rounded-full border border-white/40 bg-white/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-ink shadow-lg backdrop-blur-md dark:border-white/15 dark:bg-night-800/95 dark:text-ink-dark whitespace-nowrap"
           >
             {label}
           </motion.span>
@@ -483,8 +467,8 @@ function AppleDockItem({
 
       <span className="relative z-10 flex items-center justify-center text-ink dark:text-ink-dark">
         <Icon
-          className={`h-4 w-4 transition-all duration-200 sm:h-5 sm:w-5 ${
-            isActive
+          className={`h-4 w-4 sm:h-[18px] sm:w-[18px] transition-all duration-200 ${
+            isActive || isTouchHovered
               ? "stroke-[2.4] text-ink dark:text-white"
               : "stroke-[1.8] opacity-70 group-hover:opacity-100"
           }`}
@@ -495,7 +479,7 @@ function AppleDockItem({
       {isActive && (
         <motion.span
           layoutId="activeDockDot"
-          className="absolute bottom-0.5 sm:bottom-1 h-1 w-1 rounded-full bg-[#8A5FD1] shadow-[0_0_8px_#8A5FD1] dark:bg-lav-dark dark:shadow-[0_0_10px_#9F83FF]"
+          className="absolute bottom-0.5 h-1 w-1 rounded-full bg-[#8A5FD1] shadow-[0_0_8px_#8A5FD1] dark:bg-lav-dark dark:shadow-[0_0_10px_#9F83FF]"
           transition={{ type: "spring", stiffness: 450, damping: 30 }}
         />
       )}
@@ -505,7 +489,7 @@ function AppleDockItem({
 
 /* ========================================================
    Authentic Minimal Apple Liquid Glass Bottom Dock
-   (Optimized for Phone, iPad & Desktop with Touch Magnification)
+   (Zero Lag, Touch Slide-to-Select, Instant 120Hz Response)
    ======================================================== */
 function BottomNavbar({
   active,
@@ -523,69 +507,112 @@ function BottomNavbar({
   const mouseX = useMotionValue(Infinity);
   const dockRef = useRef<HTMLDivElement>(null);
 
-  // Dynamic Specular Sheen following cursor or finger touch inside dock
-  const dockSheenX = useMotionValue(-500);
-  const dockSheenY = useMotionValue(-500);
+  const [itemCenters, setItemCenters] = useState<Record<string, number>>({});
+  const [hoveredNavId, setHoveredNavId] = useState<string | null>(null);
 
-  const handlePointerMove = (clientX: number, clientY: number) => {
-    mouseX.set(clientX);
-    if (dockRef.current) {
-      const rect = dockRef.current.getBoundingClientRect();
-      dockSheenX.set(clientX - rect.left);
-      dockSheenY.set(clientY - rect.top);
+  const measureItemCenters = () => {
+    if (!dockRef.current) return;
+    const items = dockRef.current.querySelectorAll<HTMLAnchorElement>("[data-dock-id]");
+    const map: Record<string, number> = {};
+    items.forEach((item) => {
+      const id = item.dataset.dockId;
+      if (id) {
+        const rect = item.getBoundingClientRect();
+        map[id] = rect.left + rect.width / 2;
+      }
+    });
+    setItemCenters(map);
+  };
+
+  useEffect(() => {
+    measureItemCenters();
+    window.addEventListener("resize", measureItemCenters);
+    return () => window.removeEventListener("resize", measureItemCenters);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  const handlePointerLeave = () => {
+  const findClosestItem = (clientX: number) => {
+    let closest: string | null = null;
+    let minDist = 42;
+    for (const [id, cx] of Object.entries(itemCenters)) {
+      const d = Math.abs(clientX - cx);
+      if (d < minDist) {
+        minDist = d;
+        closest = id;
+      }
+    }
+    setHoveredNavId(closest);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    measureItemCenters();
+    if (e.touches[0]) {
+      const tx = e.touches[0].clientX;
+      mouseX.set(tx);
+      findClosestItem(tx);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches[0]) {
+      const tx = e.touches[0].clientX;
+      mouseX.set(tx);
+      findClosestItem(tx);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (hoveredNavId) {
+      scrollToSection(hoveredNavId);
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        try {
+          navigator.vibrate(10);
+        } catch {}
+      }
+    }
     mouseX.set(Infinity);
-    dockSheenX.set(-500);
-    dockSheenY.set(-500);
+    setHoveredNavId(null);
   };
 
   return (
     <>
       {/* Top Frosted Liquid Glass Reading Progress Bar with Glowing Tip */}
-      <div className="fixed inset-x-0 top-0 z-[120] pointer-events-none h-[3px] overflow-hidden bg-white/20 dark:bg-white/5 backdrop-blur-md">
+      <div className="fixed inset-x-0 top-0 z-[120] pointer-events-none h-[2.5px] overflow-hidden bg-white/20 dark:bg-white/5 backdrop-blur-md">
         <motion.div
           style={{ scaleX }}
-          className="h-full origin-left bg-gradient-to-r from-lav via-[#8a5fd1] to-blush-dark shadow-[0_0_12px_rgba(138,95,209,0.85)] gpu-layer"
+          className="h-full origin-left bg-gradient-to-r from-lav via-[#8a5fd1] to-blush-dark shadow-[0_0_10px_rgba(138,95,209,0.85)] gpu-layer"
           aria-hidden="true"
         />
       </div>
 
-      {/* Minimal Apple Liquid Glass Dock - Strictly at the BOTTOM with Touch Magnify */}
+      {/* Minimal Apple Liquid Glass Dock - Strictly at the BOTTOM with Touch Slide */}
       <nav
         ref={dockRef}
         aria-label="Bottom primary navigation"
-        onMouseMove={(e) => handlePointerMove(e.clientX, e.clientY)}
-        onMouseLeave={handlePointerLeave}
-        onTouchStart={(e) => {
-          if (e.touches[0]) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        onMouseMove={(e) => {
+          mouseX.set(e.clientX);
         }}
-        onTouchMove={(e) => {
-          if (e.touches[0]) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        onMouseLeave={() => {
+          mouseX.set(Infinity);
         }}
-        onTouchEnd={handlePointerLeave}
-        className="apple-dock-capsule fixed bottom-3 sm:bottom-6 md:bottom-8 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-0.5 sm:gap-1.5 rounded-full p-1 sm:p-2 shadow-2xl select-none max-w-[calc(100vw-16px)] sm:max-w-none touch-pan-y gpu-layer"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="apple-dock-capsule fixed bottom-3 sm:bottom-6 md:bottom-7 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-0.5 sm:gap-1 rounded-full p-1 sm:p-1.5 shadow-2xl select-none max-w-[calc(100vw-16px)] sm:max-w-none gpu-layer"
         style={{
           marginBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        {/* Dynamic Specular Lens Sheen inside dock */}
-        <motion.div
-          className="pointer-events-none absolute -inset-px rounded-full opacity-0 transition-opacity duration-300 hover:opacity-100"
-          style={{
-            background: useTransform(
-              [dockSheenX, dockSheenY],
-              ([cx, cy]) =>
-                `radial-gradient(150px circle at ${cx}px ${cy}px, rgba(255, 255, 255, 0.45), transparent 75%)`
-            ),
-          }}
-        />
-
         {c.nav.map((n) => {
           const Icon = navIcons[n.id] || Home;
           const isActive = active === n.id;
+          const isTouchHovered = hoveredNavId === n.id;
           return (
             <AppleDockItem
               key={n.id}
@@ -593,38 +620,43 @@ function BottomNavbar({
               label={n.label}
               Icon={Icon}
               isActive={isActive}
+              isTouchHovered={isTouchHovered}
               mouseX={mouseX}
+              itemCenter={itemCenters[n.id] || 0}
+              onSelect={scrollToSection}
             />
           );
         })}
 
         {/* Vertical Apple Control Center Hairline Divider */}
-        <div className="mx-0.5 sm:mx-1 h-5 w-px bg-ink/15 dark:bg-white/15" />
+        <div className="mx-0.5 h-4 w-px bg-ink/15 dark:bg-white/15" />
 
-        {/* Theme Toggle Button inside Dock with Magnetic spring */}
-        <Magnetic pull={0.35}>
-          <button
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full text-ink transition hover:scale-110 hover:bg-white/40 dark:text-ink-dark dark:hover:bg-white/10"
-          >
-            {mounted && (
-              <motion.div
-                key={theme}
-                initial={{ rotate: -90, scale: 0.7, opacity: 0 }}
-                animate={{ rotate: 0, scale: 1, opacity: 1 }}
-                exit={{ rotate: 90, scale: 0.7, opacity: 0 }}
-                transition={{ duration: 0.25 }}
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-amber-300 stroke-[2.2]" />
-                ) : (
-                  <Moon className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.2]" />
-                )}
-              </motion.div>
-            )}
-          </button>
-        </Magnetic>
+        {/* Theme Toggle Button inside Dock */}
+        <button
+          onClick={toggleTheme}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            toggleTheme();
+          }}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          className="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-ink transition hover:scale-110 hover:bg-white/40 dark:text-ink-dark dark:hover:bg-white/10"
+        >
+          {mounted && (
+            <motion.div
+              key={theme}
+              initial={{ rotate: -90, scale: 0.7, opacity: 0 }}
+              animate={{ rotate: 0, scale: 1, opacity: 1 }}
+              exit={{ rotate: 90, scale: 0.7, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4 sm:h-[18px] sm:w-[18px] text-amber-300 stroke-[2.2]" />
+              ) : (
+                <Moon className="h-4 w-4 sm:h-[18px] sm:w-[18px] stroke-[2.2]" />
+              )}
+            </motion.div>
+          )}
+        </button>
       </nav>
     </>
   );
@@ -693,7 +725,7 @@ function SlideToChat() {
 
   return (
     <div className="w-full">
-      <div className="mb-3 flex items-center justify-between text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
+      <div className="mb-2.5 flex items-center justify-between text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
         <span className="flex items-center gap-1.5">
           <WhatsAppIcon className="h-4 w-4 text-emerald-500" /> Instant WhatsApp
         </span>
@@ -703,7 +735,7 @@ function SlideToChat() {
       {/* iPhone Slider Track */}
       <div
         ref={trackRef}
-        className="iphone-slider-track relative flex h-[60px] w-full select-none items-center overflow-hidden rounded-full p-1.5"
+        className="iphone-slider-track relative flex h-[58px] w-full select-none items-center overflow-hidden rounded-full p-1.5"
       >
         {/* Animated Green Trail following the Knob */}
         <motion.div
@@ -731,7 +763,7 @@ function SlideToChat() {
           style={{ x: dragX, touchAction: "none" }}
           whileDrag={{ scale: 1.08 }}
           transition={{ type: "spring", stiffness: 450, damping: 35 }}
-          className="relative z-10 flex h-[48px] w-[48px] cursor-grab items-center justify-center rounded-full bg-gradient-to-tr from-[#25D366] via-[#20BA5A] to-[#128C7E] text-white shadow-[0_6px_20px_rgba(37,211,102,0.45)] ring-2 ring-white/70 active:cursor-grabbing gpu-layer"
+          className="relative z-10 flex h-[46px] w-[46px] cursor-grab items-center justify-center rounded-full bg-gradient-to-tr from-[#25D366] via-[#20BA5A] to-[#128C7E] text-white shadow-[0_6px_20px_rgba(37,211,102,0.45)] ring-2 ring-white/70 active:cursor-grabbing gpu-layer"
         >
           {isSuccess ? (
             <motion.div
@@ -754,14 +786,13 @@ function SlideToChat() {
   );
 }
 
-/* ---------------- Hero Section ---------------- */
+/* ---------------- Hero Section (Compact & Buttery Smooth) ---------------- */
 function Hero() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const yHeadline = useTransform(scrollYProgress, [0, 1], [0, 180]);
-  const yTagline = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const heroBlur = useTransform(scrollYProgress, [0, 0.7], ["blur(0px)", "blur(18px)"]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.7], [1, 0.93]);
+  const yHeadline = useTransform(scrollYProgress, [0, 1], [0, 140]);
+  const yTagline = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.7], [1, 0.95]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   // Live Local Time in Kerala (Asia/Kolkata)
@@ -792,20 +823,20 @@ function Hero() {
     <section
       id="home"
       ref={ref}
-      className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-4 pb-36 pt-24 sm:px-8 md:px-12 lg:px-16"
+      className="relative flex min-h-[85svh] sm:min-h-[90svh] flex-col justify-center px-4 pb-8 pt-10 sm:px-6 sm:pb-12 sm:pt-14 md:px-10 lg:px-14"
     >
       <motion.div
-        style={{ opacity: heroOpacity, filter: heroBlur, scale: heroScale }}
-        className="mx-auto w-full max-w-[1500px] gpu-layer"
+        style={{ opacity: heroOpacity, scale: heroScale }}
+        className="mx-auto w-full max-w-[1400px] gpu-layer"
       >
         {/* Status badges */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease }}
-          className="mb-6 sm:mb-8 flex flex-wrap items-center gap-2.5 sm:gap-3"
+          transition={{ duration: 0.5, ease }}
+          className="mb-4 sm:mb-5 flex flex-wrap items-center gap-2.5 sm:gap-3"
         >
-          <span className="liquid-glass flex items-center gap-2 rounded-full px-3.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-ink dark:text-ink-dark">
+          <span className="liquid-glass flex items-center gap-2 rounded-full px-3 py-1.5 sm:px-3.5 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-ink dark:text-ink-dark">
             <span className="relative flex h-2 w-2">
               <span className="absolute h-2 w-2 animate-ping rounded-full bg-emerald-500 opacity-75" />
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -813,7 +844,7 @@ function Hero() {
             Available for new projects
           </span>
 
-          <span className="liquid-glass flex items-center gap-2 rounded-full px-3.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-ink-muted dark:text-ink-muted-dark">
+          <span className="liquid-glass flex items-center gap-2 rounded-full px-3 py-1.5 sm:px-3.5 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-ink-muted dark:text-ink-muted-dark">
             <Clock size={12} className="text-lav dark:text-lav-dark" />
             {localTime || "Kerala, India"} • IST
           </span>
@@ -821,20 +852,20 @@ function Hero() {
 
         {/* Display Typography */}
         <motion.div style={{ y: yHeadline }}>
-          <h1 className="text-[clamp(2.75rem,13.5vw,13rem)] font-black uppercase leading-[0.88] tracking-tighter text-ink dark:text-ink-dark">
+          <h1 className="text-[clamp(2.4rem,11.5vw,10.5rem)] font-black uppercase leading-[0.88] tracking-tighter text-ink dark:text-ink-dark">
             <motion.span
               className="block bg-gradient-to-r from-ink via-[#7a4ec7] to-blush-dark bg-clip-text text-transparent dark:from-white dark:via-lav-dark dark:to-blush"
-              initial={{ y: "30%", opacity: 0 }}
+              initial={{ y: "25%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8, ease }}
+              transition={{ duration: 0.7, ease }}
             >
               {c.first}
             </motion.span>
             <motion.span
-              className="stroke-text block sm:pl-[6vw] md:pl-[8vw]"
-              initial={{ y: "30%", opacity: 0 }}
+              className="stroke-text block sm:pl-[5vw] md:pl-[7vw]"
+              initial={{ y: "25%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.85, ease, delay: 0.1 }}
+              transition={{ duration: 0.75, ease, delay: 0.08 }}
             >
               {c.last}
             </motion.span>
@@ -844,19 +875,19 @@ function Hero() {
         {/* Tagline & Call to Actions */}
         <motion.div
           style={{ y: yTagline }}
-          initial={{ opacity: 0, y: 25 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease, delay: 0.2 }}
-          className="mt-8 sm:mt-10 flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between"
+          transition={{ duration: 0.7, ease, delay: 0.15 }}
+          className="mt-6 sm:mt-8 flex flex-col gap-5 sm:gap-6 md:flex-row md:items-end md:justify-between"
         >
-          <p className="max-w-lg text-sm sm:text-base font-medium leading-relaxed text-ink/80 dark:text-ink-dark/80 md:text-xl">
+          <p className="max-w-lg text-sm sm:text-base font-medium leading-relaxed text-ink/80 dark:text-ink-dark/80 md:text-lg">
             <span className="font-bold text-ink dark:text-ink-dark">{c.role}.</span> {c.tagline}
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2.5">
             <Magnetic>
               <a
                 href="#works"
-                className="rounded-full bg-ink px-6 py-3.5 sm:px-8 sm:py-4 text-xs font-bold uppercase tracking-widest text-white shadow-md transition hover:scale-105 hover:bg-ink/90 dark:bg-white dark:text-night-900 dark:hover:bg-white/90"
+                className="rounded-full bg-ink px-6 py-3 sm:px-7 sm:py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-md transition hover:scale-105 hover:bg-ink/90 dark:bg-white dark:text-night-900 dark:hover:bg-white/90"
               >
                 Explore works
               </a>
@@ -864,7 +895,7 @@ function Hero() {
             <Magnetic>
               <a
                 href="#contact"
-                className="liquid-glass rounded-full px-6 py-3.5 sm:px-8 sm:py-4 text-xs font-bold uppercase tracking-widest text-ink transition hover:scale-105 dark:text-ink-dark"
+                className="liquid-glass rounded-full px-6 py-3 sm:px-7 sm:py-3.5 text-xs font-bold uppercase tracking-widest text-ink transition hover:scale-105 dark:text-ink-dark"
               >
                 Get in touch
               </a>
@@ -874,12 +905,12 @@ function Hero() {
 
         {/* Elevated Frosted Liquid Glass Skills Marquee */}
         <motion.div
-          initial={{ opacity: 0, y: 25 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease, delay: 0.35 }}
-          className="mt-12 w-full sm:mt-16"
+          transition={{ duration: 0.7, ease, delay: 0.25 }}
+          className="mt-6 sm:mt-8 w-full"
         >
-          <div className="liquid-glass relative mx-auto overflow-hidden rounded-full py-3 sm:py-3.5 shadow-md [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
+          <div className="liquid-glass relative mx-auto overflow-hidden rounded-full py-2.5 sm:py-3 shadow-sm [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
             <div className="flex w-max animate-marquee gap-6 sm:gap-8 text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em] sm:tracking-[0.28em] text-ink/70 dark:text-ink-dark/70">
               {marqueeSkills.map((s, i) => (
                 <span key={`${s}-${i}`} className="flex items-center gap-6 sm:gap-8">
@@ -899,30 +930,30 @@ function Hero() {
 function About() {
   return (
     <Section id="about" label="About Me">
-      <h2 className="text-[clamp(2.2rem,6.5vw,5.5rem)] font-black leading-[0.98] tracking-tighter text-ink dark:text-ink-dark">
+      <h2 className="text-[clamp(2rem,5.5vw,4.5rem)] font-black leading-[0.98] tracking-tighter text-ink dark:text-ink-dark">
         <Split text={c.about.headline} />
       </h2>
 
-      <div className="mt-14 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <Reveal className="liquid-glass rounded-[2rem] p-7 md:p-10">
+      <div className="mt-6 sm:mt-8 grid gap-4 sm:gap-5 lg:grid-cols-[1.5fr_1fr]">
+        <Reveal className="liquid-glass rounded-[1.75rem] p-6 sm:p-8 md:p-9">
           {c.about.body.map((paragraph, i) => (
             <p
               key={i}
-              className="mb-5 text-base font-medium leading-relaxed text-ink/80 last:mb-0 dark:text-ink-dark/80 md:text-lg"
+              className="mb-3.5 sm:mb-4 text-sm sm:text-base font-medium leading-relaxed text-ink/80 last:mb-0 dark:text-ink-dark/80 md:text-lg"
             >
               {paragraph}
             </p>
           ))}
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-1">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
           {c.about.stats.map((s, i) => (
-            <Reveal key={s.l} delay={i * 0.1}>
-              <SpotlightCard className="flex flex-col justify-center rounded-[2rem] p-6 md:p-8">
-                <div className="text-4xl font-black tracking-tighter text-ink dark:text-ink-dark md:text-6xl">
+            <Reveal key={s.l} delay={i * 0.08}>
+              <SpotlightCard className="flex flex-col justify-center rounded-[1.75rem] p-5 sm:p-6 md:p-7">
+                <div className="text-3xl font-black tracking-tighter text-ink dark:text-ink-dark md:text-5xl">
                   {s.n}
                 </div>
-                <div className="mt-1 text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
+                <div className="mt-1 text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
                   {s.l}
                 </div>
               </SpotlightCard>
@@ -938,29 +969,28 @@ function About() {
 function Skills() {
   return (
     <Section id="skills" label="Technical Skills">
-      <h2 className="mb-14 text-[clamp(2.5rem,8.5vw,7.5rem)] font-black uppercase leading-[0.9] tracking-tighter text-ink dark:text-ink-dark">
+      <h2 className="mb-6 sm:mb-8 text-[clamp(2.2rem,7vw,6rem)] font-black uppercase leading-[0.9] tracking-tighter text-ink dark:text-ink-dark">
         <Split text="Tools of" /> <Split text="the craft" className="stroke-text" delay={0.12} />
       </h2>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
         {c.skills.map((group, i) => (
-          <Reveal key={group.title} delay={i * 0.1}>
-            <SpotlightCard className="h-full rounded-[2rem] p-7 md:p-9">
-              <div className="mb-5 text-xs font-bold uppercase tracking-[0.3em] text-lav dark:text-lav-dark">
+          <Reveal key={group.title} delay={i * 0.08}>
+            <SpotlightCard className="h-full rounded-[1.75rem] p-6 sm:p-7 md:p-8">
+              <div className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-lav dark:text-lav-dark">
                 0{i + 1} //
               </div>
-              <h3 className="mb-6 text-2xl font-extrabold tracking-tight text-ink dark:text-ink-dark md:text-3xl">
+              <h3 className="mb-4 text-xl font-extrabold tracking-tight text-ink dark:text-ink-dark md:text-2xl">
                 {group.title}
               </h3>
-              <div className="flex flex-wrap gap-2.5">
+              <div className="flex flex-wrap gap-2">
                 {group.items.map((skill) => (
-                  <motion.span
+                  <span
                     key={skill}
-                    whileHover={{ y: -3, scale: 1.05 }}
-                    className="cursor-default rounded-full border border-white/80 bg-white/60 px-4 py-2 text-xs font-semibold text-ink shadow-sm transition-colors hover:border-lav hover:bg-white dark:border-night-600 dark:bg-night-800/80 dark:text-ink-dark dark:hover:border-lav-dark"
+                    className="cursor-default rounded-full border border-white/80 bg-white/60 px-3.5 py-1.5 text-xs font-semibold text-ink shadow-sm transition-colors hover:border-lav hover:bg-white dark:border-night-600 dark:bg-night-800/80 dark:text-ink-dark dark:hover:border-lav-dark"
                   >
                     {skill}
-                  </motion.span>
+                  </span>
                 ))}
               </div>
             </SpotlightCard>
@@ -990,8 +1020,8 @@ function Works() {
 
   return (
     <Section id="works" label="Selected Works">
-      <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-        <h2 className="text-[clamp(2.5rem,8.5vw,7.5rem)] font-black uppercase leading-[0.9] tracking-tighter text-ink dark:text-ink-dark">
+      <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <h2 className="text-[clamp(2.2rem,7vw,6rem)] font-black uppercase leading-[0.9] tracking-tighter text-ink dark:text-ink-dark">
           <Split text="Featured" /> <Split text="projects" className="stroke-text" delay={0.12} />
         </h2>
 
@@ -1026,7 +1056,7 @@ function Works() {
       </div>
 
       {/* Projects Grid */}
-      <motion.div layout className="mt-12 grid gap-6 md:grid-cols-2">
+      <motion.div layout className="mt-6 sm:mt-8 grid gap-4 sm:gap-5 md:grid-cols-2">
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project, i) => (
             <motion.div
@@ -1035,50 +1065,48 @@ function Works() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.45, ease }}
+              transition={{ duration: 0.35, ease }}
             >
               <SpotlightCard
                 onClick={() => setSelectedProject(project)}
-                className="cursor-pointer rounded-[2rem] p-4 transition-all hover:shadow-2xl"
+                className="cursor-pointer rounded-[1.75rem] p-3.5 sm:p-4 transition-all hover:shadow-2xl"
               >
                 <div
-                  className="relative aspect-[16/10] overflow-hidden rounded-[1.5rem]"
+                  className="relative aspect-[16/10] overflow-hidden rounded-[1.25rem]"
                   style={{ background: project.g }}
                 >
-                  <motion.div
-                    className="absolute -right-10 -top-10 h-52 w-52 rounded-full bg-white/40 blur-2xl"
-                    animate={{ x: [0, -25, 0], y: [0, 25, 0] }}
-                    transition={{ duration: 7 + i * 2, repeat: Infinity, ease: "easeInOut" }}
+                  <div
+                    className="absolute -right-8 -top-8 h-44 w-44 rounded-full bg-white/40 blur-2xl"
                   />
 
                   {/* Watermark project number */}
-                  <span className="absolute bottom-3 left-5 text-[clamp(4rem,10vw,8rem)] font-black leading-none tracking-tighter text-white/80 transition duration-500 group-hover:-translate-y-2 dark:text-white/40">
+                  <span className="absolute bottom-2 left-4 text-[clamp(3.5rem,8.5vw,7rem)] font-black leading-none tracking-tighter text-white/80 transition duration-300 group-hover:-translate-y-1 dark:text-white/40">
                     {project.n}
                   </span>
 
                   {/* Action Icon Pill */}
-                  <span className="liquid-glass absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full text-ink shadow-md transition duration-500 group-hover:rotate-45 group-hover:scale-110 dark:text-ink-dark">
-                    <ArrowUpRight size={20} />
+                  <span className="liquid-glass absolute right-3 top-3 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-ink shadow-md transition duration-300 group-hover:rotate-45 group-hover:scale-110 dark:text-ink-dark">
+                    <ArrowUpRight size={18} />
                   </span>
                 </div>
 
-                <div className="px-3 pb-3 pt-5">
-                  <div className="mb-2 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
+                <div className="px-2 pb-2 pt-4">
+                  <div className="mb-1.5 flex items-center justify-between text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
                     <span>{project.tag}</span>
                     <span>{project.year}</span>
                   </div>
-                  <h3 className="text-2xl font-extrabold tracking-tight text-ink dark:text-ink-dark md:text-3xl">
+                  <h3 className="text-xl font-extrabold tracking-tight text-ink dark:text-ink-dark md:text-2xl">
                     {project.title}
                   </h3>
-                  <p className="mt-2 text-sm font-medium leading-relaxed text-ink/75 dark:text-ink-dark/75">
+                  <p className="mt-1.5 text-xs sm:text-sm font-medium leading-relaxed text-ink/75 dark:text-ink-dark/75">
                     {project.desc}
                   </p>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-3 flex flex-wrap gap-1.5">
                     {project.tech.map((t) => (
                       <span
                         key={t}
-                        className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-semibold text-ink dark:bg-night-700 dark:text-ink-dark"
+                        className="rounded-full bg-white/70 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold text-ink dark:bg-night-700 dark:text-ink-dark"
                       >
                         {t}
                       </span>
@@ -1107,18 +1135,18 @@ function Works() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="modal-project-title"
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.92, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ duration: 0.35, ease }}
-              className="liquid-glass relative z-10 w-full max-w-2xl overflow-hidden rounded-[2.5rem] p-7 shadow-2xl dark:bg-night-800 md:p-10"
+              exit={{ opacity: 0, scale: 0.92, y: 15 }}
+              transition={{ duration: 0.25, ease }}
+              className="liquid-glass relative z-10 w-full max-w-2xl overflow-hidden rounded-[2rem] p-6 shadow-2xl dark:bg-night-800 md:p-9"
             >
               <button
                 onClick={() => setSelectedProject(null)}
                 aria-label="Close modal"
-                className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-ink shadow-sm transition hover:scale-110 dark:bg-night-700 dark:text-ink-dark"
+                className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-ink shadow-sm transition hover:scale-110 dark:bg-night-700 dark:text-ink-dark"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
 
               <div className="mb-2 text-xs font-bold uppercase tracking-[0.3em] text-lav dark:text-lav-dark">
@@ -1127,24 +1155,24 @@ function Works() {
 
               <h3
                 id="modal-project-title"
-                className="text-3xl font-black tracking-tight text-ink dark:text-ink-dark md:text-4xl"
+                className="text-2xl font-black tracking-tight text-ink dark:text-ink-dark md:text-3xl"
               >
                 {selectedProject.title}
               </h3>
 
-              <p className="mt-4 text-base font-medium leading-relaxed text-ink/80 dark:text-ink-dark/80">
+              <p className="mt-3 text-sm sm:text-base font-medium leading-relaxed text-ink/80 dark:text-ink-dark/80">
                 {selectedProject.longDesc || selectedProject.desc}
               </p>
 
-              <div className="mt-6">
-                <div className="mb-3 text-xs font-bold uppercase tracking-widest text-ink-muted dark:text-ink-muted-dark">
+              <div className="mt-5">
+                <div className="mb-2 text-xs font-bold uppercase tracking-widest text-ink-muted dark:text-ink-muted-dark">
                   Technologies Used
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {selectedProject.tech.map((t) => (
                     <span
                       key={t}
-                      className="rounded-full border border-lav/40 bg-white/80 px-4 py-1.5 text-xs font-semibold text-ink dark:bg-night-700 dark:text-ink-dark"
+                      className="rounded-full border border-lav/40 bg-white/80 px-3.5 py-1 text-xs font-semibold text-ink dark:bg-night-700 dark:text-ink-dark"
                     >
                       {t}
                     </span>
@@ -1152,14 +1180,14 @@ function Works() {
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-wrap gap-4 pt-4 border-t border-ink/10 dark:border-ink-dark/10">
+              <div className="mt-6 flex flex-wrap gap-3 pt-4 border-t border-ink/10 dark:border-ink-dark/10">
                 {selectedProject.url && (
                   <Magnetic>
                     <a
                       href={selectedProject.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-xs font-bold uppercase tracking-widest text-white shadow transition hover:scale-105 dark:bg-white dark:text-night-900"
+                      className="flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow transition hover:scale-105 dark:bg-white dark:text-night-900"
                     >
                       Live Demo <ExternalLink size={14} />
                     </a>
@@ -1171,7 +1199,7 @@ function Works() {
                       href={selectedProject.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="liquid-glass flex items-center gap-2 rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest text-ink transition hover:scale-105 dark:text-ink-dark"
+                      className="liquid-glass flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-ink transition hover:scale-105 dark:text-ink-dark"
                     >
                       View Source <Github size={14} />
                     </a>
@@ -1197,26 +1225,26 @@ function Experience() {
 
   return (
     <Section id="experience" label="Career Journey">
-      <h2 className="mb-14 text-[clamp(2.5rem,8.5vw,7.5rem)] font-black uppercase leading-[0.9] tracking-tighter text-ink dark:text-ink-dark">
+      <h2 className="mb-6 sm:mb-8 text-[clamp(2.2rem,7vw,6rem)] font-black uppercase leading-[0.9] tracking-tighter text-ink dark:text-ink-dark">
         <Split text="My" /> <Split text="journey" className="stroke-text" delay={0.12} />
       </h2>
 
-      <div ref={expRef} className="relative ml-3 border-l border-ink/15 pl-8 dark:border-ink-dark/20 md:ml-6 md:pl-14">
+      <div ref={expRef} className="relative ml-2 sm:ml-4 border-l border-ink/15 pl-6 sm:pl-10 dark:border-ink-dark/20 md:ml-6 md:pl-12">
         {/* Scroll-Linked Glowing Laser Beam with blur glow */}
         <motion.div
-          className="absolute -left-[1px] top-0 w-[2.5px] origin-top bg-gradient-to-b from-lav via-[#8a5fd1] to-blush shadow-[0_0_14px_#8a5fd1] dark:shadow-[0_0_18px_#9F83FF] gpu-layer"
+          className="absolute -left-[1px] top-0 w-[2.5px] origin-top bg-gradient-to-b from-lav via-[#8a5fd1] to-blush shadow-[0_0_12px_#8a5fd1] dark:shadow-[0_0_16px_#9F83FF] gpu-layer"
           style={{ height: laserHeight }}
         />
 
         {c.experience.map((item, i) => (
-          <Reveal key={`${item.role}-${item.co}`} delay={i * 0.1} className="relative mb-8 last:mb-0">
+          <Reveal key={`${item.role}-${item.co}`} delay={i * 0.08} className="relative mb-4 sm:mb-5 last:mb-0">
             {/* Illuminated Milestone Node with blur glow */}
             <span
-              className="absolute -left-[41px] top-8 h-4 w-4 rounded-full border-4 border-white bg-lav shadow-[0_0_12px_rgba(138,95,209,0.7)] dark:border-night-900 dark:bg-lav-dark dark:shadow-[0_0_16px_rgba(159,131,255,0.85)] md:-left-[65px] gpu-layer"
+              className="absolute -left-[33px] sm:-left-[49px] top-6 h-3.5 w-3.5 rounded-full border-[3px] border-white bg-lav shadow-[0_0_10px_rgba(138,95,209,0.7)] dark:border-night-900 dark:bg-lav-dark dark:shadow-[0_0_12px_rgba(159,131,255,0.85)] md:-left-[57px] gpu-layer"
               aria-hidden="true"
             />
 
-            <SpotlightCard className="rounded-[2rem] p-6 md:p-8">
+            <SpotlightCard className="rounded-[1.75rem] p-5 sm:p-6 md:p-7">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
                 <span>{item.period}</span>
                 <span className="rounded-full bg-lav/20 px-3 py-1 text-[#6b4fb8] dark:bg-lav-dark/20 dark:text-lav-dark">
@@ -1224,19 +1252,19 @@ function Experience() {
                 </span>
               </div>
 
-              <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-ink dark:text-ink-dark md:text-3xl">
+              <h3 className="mt-2 text-xl font-extrabold tracking-tight text-ink dark:text-ink-dark md:text-2xl">
                 {item.role}
               </h3>
 
-              <p className="mt-3 text-sm font-medium leading-relaxed text-ink/75 dark:text-ink-dark/75 md:text-base">
+              <p className="mt-2 text-sm font-medium leading-relaxed text-ink/75 dark:text-ink-dark/75">
                 {item.desc}
               </p>
 
               {item.highlights && (
-                <ul className="mt-4 space-y-1.5 text-sm text-ink/70 dark:text-ink-dark/70">
+                <ul className="mt-3 space-y-1 text-xs sm:text-sm text-ink/70 dark:text-ink-dark/70">
                   {item.highlights.map((h, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <span className="mt-1 text-lav dark:text-lav-dark">✦</span>
+                      <span className="mt-0.5 text-lav dark:text-lav-dark">✦</span>
                       <span>{h}</span>
                     </li>
                   ))}
@@ -1244,11 +1272,11 @@ function Experience() {
               )}
 
               {item.skills && (
-                <div className="mt-5 flex flex-wrap gap-2 pt-2">
+                <div className="mt-4 flex flex-wrap gap-1.5 pt-1">
                   {item.skills.map((s) => (
                     <span
                       key={s}
-                      className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-semibold text-ink dark:bg-night-700 dark:text-ink-dark"
+                      className="rounded-full bg-white/70 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold text-ink dark:bg-night-700 dark:text-ink-dark"
                     >
                       {s}
                     </span>
@@ -1286,15 +1314,15 @@ function Contact() {
         `Portfolio Inquiry from ${form.name}`
       )}&body=${encodeURIComponent(`${form.msg}\n\nFrom: ${form.name} (${form.email})`)}`;
       window.open(mailtoUrl, "_blank");
-    }, 900);
+    }, 800);
   };
 
   const fieldClasses =
-    "w-full rounded-2xl border border-white/80 bg-white/60 px-5 py-4 text-sm font-medium text-ink outline-none transition placeholder:text-ink/40 focus:border-lav focus:bg-white focus:ring-2 focus:ring-lav/40 dark:border-night-600 dark:bg-night-800/80 dark:text-ink-dark dark:placeholder:text-ink-dark/40 dark:focus:border-lav-dark dark:focus:bg-night-800";
+    "w-full rounded-2xl border border-white/80 bg-white/60 px-4 py-3.5 text-sm font-medium text-ink outline-none transition placeholder:text-ink/40 focus:border-lav focus:bg-white focus:ring-2 focus:ring-lav/40 dark:border-night-600 dark:bg-night-800/80 dark:text-ink-dark dark:placeholder:text-ink-dark/40 dark:focus:border-lav-dark dark:focus:bg-night-800";
 
   return (
     <Section id="contact" label="Get In Touch">
-      <h2 className="text-[clamp(2.6rem,10.5vw,9.5rem)] font-black uppercase leading-[0.88] tracking-tighter text-ink dark:text-ink-dark">
+      <h2 className="text-[clamp(2.2rem,8vw,7rem)] font-black uppercase leading-[0.9] tracking-tighter text-ink dark:text-ink-dark">
         <Split text="Let's build" />
         <br />
         <Split text="something" className="stroke-text" delay={0.12} />
@@ -1302,9 +1330,9 @@ function Contact() {
         <Split text="lovely." delay={0.24} />
       </h2>
 
-      <div className="mt-14 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 sm:mt-8 grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Contact Info & WhatsApp Slider Card */}
-        <Reveal className="liquid-glass flex flex-col justify-between gap-8 rounded-[2rem] p-7 md:p-10">
+        <Reveal className="liquid-glass flex flex-col justify-between gap-6 rounded-[1.75rem] p-6 sm:p-8">
           <div>
             <div className="mb-2 text-xs font-bold uppercase tracking-[0.3em] text-ink-muted dark:text-ink-muted-dark">
               Direct Contact
@@ -1312,7 +1340,7 @@ function Contact() {
             <div className="flex flex-wrap items-center gap-3">
               <a
                 href={`mailto:${c.email}`}
-                className="break-all text-xl font-extrabold tracking-tight text-ink underline-offset-4 hover:underline dark:text-ink-dark md:text-3xl"
+                className="break-all text-lg font-extrabold tracking-tight text-ink underline-offset-4 hover:underline dark:text-ink-dark sm:text-2xl"
               >
                 {c.email}
               </a>
@@ -1320,17 +1348,17 @@ function Contact() {
                 <button
                   onClick={copyEmail}
                   aria-label="Copy email address"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-ink shadow-sm transition hover:scale-110 dark:bg-night-700 dark:text-ink-dark"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-ink shadow-sm transition hover:scale-110 dark:bg-night-700 dark:text-ink-dark"
                 >
-                  {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                  {copied ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
                 </button>
               </Magnetic>
             </div>
             {copied && (
               <motion.p
-                initial={{ opacity: 0, y: -5 }}
+                initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-2 text-xs font-bold text-emerald-600 dark:text-emerald-400"
+                className="mt-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400"
               >
                 Copied email address to clipboard!
               </motion.p>
@@ -1338,15 +1366,15 @@ function Contact() {
           </div>
 
           {/* iPhone Slide to Chat WhatsApp Slider */}
-          <div className="liquid-glass rounded-[2rem] p-5 shadow-sm">
+          <div className="liquid-glass rounded-[1.5rem] p-4 sm:p-5 shadow-sm">
             <SlideToChat />
           </div>
 
           <div>
-            <div className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-ink-muted dark:text-ink-muted-dark">
+            <div className="mb-2.5 text-xs font-bold uppercase tracking-[0.3em] text-ink-muted dark:text-ink-muted-dark">
               Connect Across the Web
             </div>
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2">
               {c.socials.map((s) => (
                 <Magnetic key={s.l} pull={0.35}>
                   <a
@@ -1354,9 +1382,9 @@ function Contact() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.ariaLabel}
-                    className="flex items-center gap-1.5 rounded-full border border-white/80 bg-white/60 px-5 py-3 text-xs font-bold uppercase tracking-widest text-ink shadow-sm transition hover:scale-105 hover:bg-white dark:border-night-600 dark:bg-night-800 dark:text-ink-dark dark:hover:bg-night-700"
+                    className="flex items-center gap-1 rounded-full border border-white/80 bg-white/60 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-ink shadow-sm transition hover:scale-105 hover:bg-white dark:border-night-600 dark:bg-night-800 dark:text-ink-dark dark:hover:bg-night-700"
                   >
-                    {s.l} <ArrowUpRight size={14} />
+                    {s.l} <ArrowUpRight size={13} />
                   </a>
                 </Magnetic>
               ))}
@@ -1365,21 +1393,21 @@ function Contact() {
         </Reveal>
 
         {/* Interactive Form Card */}
-        <Reveal delay={0.1}>
-          <div className="liquid-glass rounded-[2rem] p-6 md:p-9">
+        <Reveal delay={0.08}>
+          <div className="liquid-glass rounded-[1.75rem] p-6 sm:p-8">
             {status === "success" ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center py-12 text-center"
+                className="flex flex-col items-center justify-center py-10 text-center"
               >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                  <Check size={32} />
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                  <Check size={28} />
                 </div>
-                <h3 className="mt-5 text-2xl font-black text-ink dark:text-ink-dark">
+                <h3 className="mt-4 text-xl font-black text-ink dark:text-ink-dark">
                   Message Prepared!
                 </h3>
-                <p className="mt-2 max-w-sm text-sm font-medium text-ink/70 dark:text-ink-dark/70">
+                <p className="mt-2 max-w-sm text-xs sm:text-sm font-medium text-ink/70 dark:text-ink-dark/70">
                   Thank you for reaching out. Your default email composer has been opened to finalize and send your message.
                 </p>
                 <Magnetic>
@@ -1388,14 +1416,14 @@ function Contact() {
                       setStatus("idle");
                       setForm({ name: "", email: "", msg: "" });
                     }}
-                    className="mt-6 rounded-full bg-ink px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:scale-105 dark:bg-white dark:text-night-900"
+                    className="mt-5 rounded-full bg-ink px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition hover:scale-105 dark:bg-white dark:text-night-900"
                   >
                     Send another message
                   </button>
                 </Magnetic>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3.5">
                 <div>
                   <label htmlFor="contact-name" className="sr-only">
                     Your Name
@@ -1432,7 +1460,7 @@ function Contact() {
                   <textarea
                     id="contact-msg"
                     required
-                    rows={5}
+                    rows={4}
                     className={fieldClasses}
                     placeholder="Tell me about your project or inquiry..."
                     value={form.msg}
@@ -1444,14 +1472,14 @@ function Contact() {
                   <button
                     type="submit"
                     disabled={status === "submitting"}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-6 py-4 text-xs font-bold uppercase tracking-widest text-white shadow-md transition hover:scale-[1.01] hover:bg-ink/90 disabled:opacity-50 dark:bg-white dark:text-night-900 dark:hover:bg-white/90"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-md transition hover:scale-[1.01] hover:bg-ink/90 disabled:opacity-50 dark:bg-white dark:text-night-900 dark:hover:bg-white/90"
                   >
                     {status === "submitting" ? (
                       <span>Preparing message...</span>
                     ) : (
                       <>
                         <span>Send Message</span>
-                        <Send size={15} />
+                        <Send size={14} />
                       </>
                     )}
                   </button>
@@ -1463,7 +1491,7 @@ function Contact() {
       </div>
 
       {/* Footer Info */}
-      <footer className="mt-20 border-t border-ink/10 pt-8 pb-16 text-center text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:border-ink-dark/10 dark:text-ink-muted-dark">
+      <footer className="mt-10 sm:mt-12 border-t border-ink/10 pt-6 pb-20 text-center text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:border-ink-dark/10 dark:text-ink-muted-dark">
         <p>
           © {new Date().getFullYear()} {c.first} {c.last} · Crafted with Next.js & Framer Motion
         </p>
@@ -1479,7 +1507,7 @@ export default function Portfolio() {
   const activeSection = useActiveSection(navIds);
 
   return (
-    <main className="relative min-h-screen pb-32 selection:bg-blush dark:selection:bg-lav-dark">
+    <main className="relative min-h-screen pb-20 sm:pb-24 selection:bg-blush dark:selection:bg-lav-dark">
       <Background />
       <CursorGlow />
       <BottomNavbar active={activeSection} theme={theme} toggleTheme={toggleTheme} mounted={mounted} />
