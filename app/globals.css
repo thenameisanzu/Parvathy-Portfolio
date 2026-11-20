@@ -1,0 +1,297 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #2A2140;
+  overflow-x: hidden;
+  background-color: #F8F2FF;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+}
+
+html.dark body {
+  background-color: #07050D;
+  color: #F4EDFF;
+}
+
+::selection {
+  background: #F9C6D4;
+  color: #2A2140;
+}
+
+html.dark ::selection {
+  background: #9F83FF;
+  color: #07050D;
+}
+
+/* Accessible sleek iOS-style scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(138, 95, 209, 0.22);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(138, 95, 209, 0.45);
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(159, 131, 255, 0.28);
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(159, 131, 255, 0.55);
+}
+
+.no-sb {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-sb::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========================================================
+   Authentic Apple / visionOS Liquid Glass System
+   ======================================================== */
+
+.liquid-glass {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.76) 0%,
+    rgba(255, 255, 255, 0.42) 65%,
+    rgba(255, 255, 255, 0.58) 100%
+  );
+  backdrop-filter: blur(32px) saturate(210%) contrast(102%);
+  -webkit-backdrop-filter: blur(32px) saturate(210%) contrast(102%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 24px 50px -12px rgba(100, 70, 160, 0.18),
+    0 4px 14px 0 rgba(0, 0, 0, 0.04),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1.5px 1.5px 0 rgba(0, 0, 0, 0.03),
+    inset 0 0 16px 0 rgba(255, 255, 255, 0.35);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.dark .liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(32, 24, 52, 0.78) 0%,
+    rgba(17, 12, 30, 0.52) 65%,
+    rgba(26, 18, 44, 0.7) 100%
+  );
+  backdrop-filter: blur(32px) saturate(210%) contrast(104%);
+  -webkit-backdrop-filter: blur(32px) saturate(210%) contrast(104%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 
+    0 28px 60px -15px rgba(0, 0, 0, 0.85),
+    0 4px 16px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1.5px 1.5px 0 rgba(0, 0, 0, 0.6),
+    inset 0 0 16px 0 rgba(159, 131, 255, 0.08);
+}
+
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.75;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, 0.95) 0%, transparent 60%);
+}
+
+html.dark .liquid-glass::before {
+  opacity: 0.28;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(159, 131, 255, 0.6) 0%, transparent 60%);
+}
+
+/* ========================================================
+   Authentic Apple Dock Liquid Glass Capsule
+   (Guaranteed fixed at the bottom with pure Apple styling)
+   ======================================================== */
+
+.apple-dock-capsule {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.86) 0%,
+    rgba(255, 255, 255, 0.52) 50%,
+    rgba(255, 255, 255, 0.78) 100%
+  );
+  backdrop-filter: blur(40px) saturate(220%) contrast(104%);
+  -webkit-backdrop-filter: blur(40px) saturate(220%) contrast(104%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 30px 70px -15px rgba(70, 40, 140, 0.3),
+    0 10px 24px -4px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
+    inset 0 2px 2px 0 rgba(255, 255, 255, 1),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.05),
+    inset 0 0 20px 0 rgba(255, 255, 255, 0.45);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.dark .apple-dock-capsule {
+  background: linear-gradient(
+    135deg,
+    rgba(36, 26, 58, 0.86) 0%,
+    rgba(16, 11, 28, 0.64) 50%,
+    rgba(28, 20, 48, 0.8) 100%
+  );
+  backdrop-filter: blur(40px) saturate(220%) contrast(106%);
+  -webkit-backdrop-filter: blur(40px) saturate(220%) contrast(106%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 
+    0 35px 80px -18px rgba(0, 0, 0, 0.95),
+    0 10px 28px -4px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    inset 0 2px 2px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.7),
+    inset 0 0 20px 0 rgba(159, 131, 255, 0.12);
+}
+
+.apple-dock-capsule::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.85;
+  background: radial-gradient(130% 80% at 50% 0%, rgba(255, 255, 255, 0.95) 0%, transparent 65%);
+}
+
+html.dark .apple-dock-capsule::before {
+  opacity: 0.35;
+  background: radial-gradient(130% 80% at 50% 0%, rgba(159, 131, 255, 0.65) 0%, transparent 65%);
+}
+
+/* ========================================================
+   iPhone Slide-To-Answer / Slide-To-Chat WhatsApp Slider
+   ======================================================== */
+
+.iphone-slider-track {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 100%);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 
+    inset 0 2px 6px rgba(0, 0, 0, 0.08),
+    0 12px 30px -6px rgba(120, 90, 180, 0.18),
+    inset 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+html.dark .iphone-slider-track {
+  background: linear-gradient(135deg, rgba(22, 16, 36, 0.75) 0%, rgba(12, 9, 22, 0.55) 100%);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 
+    inset 0 2px 8px rgba(0, 0, 0, 0.55),
+    0 14px 35px -6px rgba(0, 0, 0, 0.65),
+    inset 0 0 12px rgba(159, 131, 255, 0.08);
+}
+
+@keyframes iphone-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.iphone-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(42, 33, 64, 0.25) 0%,
+    rgba(42, 33, 64, 0.92) 50%,
+    rgba(42, 33, 64, 0.25) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: iphone-shimmer 2.2s infinite linear;
+}
+
+html.dark .iphone-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(244, 237, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.98) 50%,
+    rgba(244, 237, 255, 0.3) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: iphone-shimmer 2.2s infinite linear;
+}
+
+/* Subtle texture overlay */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='.8' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+html.dark .grain::after {
+  opacity: 0.025;
+}
+
+/* Outline / stroke text with reliable fallback */
+.stroke-text {
+  -webkit-text-stroke: 1.5px #2A2140;
+  color: transparent;
+}
+
+html.dark .stroke-text {
+  -webkit-text-stroke: 1.5px #F4EDFF;
+  color: transparent;
+}
+
+@supports not (-webkit-text-stroke: 1px black) {
+  .stroke-text {
+    color: #2A2140;
+    opacity: 0.75;
+  }
+  html.dark .stroke-text {
+    color: #F4EDFF;
+    opacity: 0.75;
+  }
+}
+
+@media (hover: none) {
+  .cursor-glow {
+    display: none !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .cursor-glow {
+    display: none !important;
+  }
+}

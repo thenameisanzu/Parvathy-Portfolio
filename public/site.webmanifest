@@ -1,0 +1,14 @@
+{
+  "name": "Parvathy Vidhu — Portfolio",
+  "short_name": "Parvathy Vidhu",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#0D0B14",
+  "background_color": "#0D0B14",
+  "display": "standalone"
+}
