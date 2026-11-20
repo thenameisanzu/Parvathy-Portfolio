@@ -199,11 +199,12 @@ function Reveal({
 
   return (
     <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 45, filter: "blur(14px)" }}
+      className={`gpu-layer ${className}`}
+      initial={{ opacity: 0, y: 35, filter: "blur(18px)" }}
       whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.85, ease, delay }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.8, ease, delay }}
+      style={{ willChange: "transform, opacity, filter" }}
     >
       {children}
     </motion.div>
@@ -220,9 +221,9 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="relative mx-auto max-w-[1500px] px-5 py-24 md:px-10 md:py-32 lg:px-16">
-      <Reveal className="mb-8 flex items-center gap-4 text-[11px] font-bold uppercase tracking-[0.35em] text-ink-muted dark:text-ink-muted-dark">
-        <span className="h-px w-12 bg-ink/30 dark:bg-ink-dark/30" /> {label}
+    <section id={id} className="relative mx-auto max-w-[1500px] px-4 py-20 sm:px-8 md:px-12 md:py-32 lg:px-16">
+      <Reveal className="mb-8 flex items-center gap-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-ink-muted dark:text-ink-muted-dark">
+        <span className="h-px w-10 sm:w-12 bg-ink/30 dark:bg-ink-dark/30" /> {label}
       </Reveal>
       {children}
     </section>
@@ -246,8 +247,8 @@ function SpotlightCard({
   const y = useMotionValue(0);
   const reduceMotion = useReducedMotion();
 
-  const rx = useSpring(useTransform(y, [-0.5, 0.5], [6, -6]), { stiffness: 220, damping: 22 });
-  const ry = useSpring(useTransform(x, [-0.5, 0.5], [-6, 6]), { stiffness: 220, damping: 22 });
+  const rx = useSpring(useTransform(y, [-0.5, 0.5], [5, -5]), { stiffness: 240, damping: 24 });
+  const ry = useSpring(useTransform(x, [-0.5, 0.5], [-5, 5]), { stiffness: 240, damping: 24 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -271,8 +272,8 @@ function SpotlightCard({
     <motion.div
       ref={cardRef}
       onClick={onClick}
-      className={`liquid-glass group relative overflow-hidden ${className}`}
-      style={reduceMotion ? {} : { rotateX: rx, rotateY: ry, transformPerspective: 1000 }}
+      className={`liquid-glass group relative overflow-hidden gpu-layer ${className}`}
+      style={reduceMotion ? {} : { rotateX: rx, rotateY: ry, transformPerspective: 1000, willChange: "transform" }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -283,7 +284,7 @@ function SpotlightCard({
           background: useTransform(
             [mouseX, mouseY],
             ([cx, cy]) =>
-              `radial-gradient(450px circle at ${cx}px ${cy}px, rgba(190, 160, 255, 0.22), transparent 80%)`
+              `radial-gradient(450px circle at ${cx}px ${cy}px, rgba(190, 160, 255, 0.24), transparent 80%)`
           ),
         }}
       />
@@ -316,49 +317,65 @@ function useActiveSection(ids: string[]) {
   return active;
 }
 
-/* ---------------- Ambient Background & Effects with Scroll Blur Parallax ---------------- */
+/* ---------------- Ambient Background & Effects with Multi-Tier Scroll Blur Parallax ---------------- */
 function Background() {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  const scrollShift = useTransform(scrollY, [0, 3000], [0, -180]);
+
+  // Distinct parallax speed curves for genuine visionOS spatial depth
+  const p1 = useTransform(scrollY, [0, 4000], [0, -340]);
+  const p2 = useTransform(scrollY, [0, 4000], [0, -180]);
+  const p3 = useTransform(scrollY, [0, 4000], [0, -420]);
+  const p4 = useTransform(scrollY, [0, 4000], [0, -120]);
 
   const blobs = [
     {
-      c: "radial-gradient(circle, rgba(201,184,245,0.75) 0%, rgba(201,184,245,0) 70%)",
-      s: "h-[65vmax] w-[65vmax] -left-[20vmax] -top-[20vmax]",
-      x: [0, 90, 0],
-      y: [0, 70, 0],
+      c: "radial-gradient(circle, rgba(201,184,245,0.82) 0%, rgba(201,184,245,0) 70%)",
+      s: "h-[68vmax] w-[68vmax] -left-[20vmax] -top-[20vmax]",
+      x: [0, 80, 0],
+      y: [0, 60, 0],
+      p: p1,
     },
     {
-      c: "radial-gradient(circle, rgba(249,198,212,0.7) 0%, rgba(249,198,212,0) 70%)",
-      s: "h-[55vmax] w-[55vmax] -right-[15vmax] top-[25vh]",
+      c: "radial-gradient(circle, rgba(249,198,212,0.78) 0%, rgba(249,198,212,0) 70%)",
+      s: "h-[58vmax] w-[58vmax] -right-[15vmax] top-[18vh]",
       x: [0, -70, 0],
-      y: [0, 90, 0],
+      y: [0, 80, 0],
+      p: p2,
     },
     {
-      c: "radial-gradient(circle, rgba(217,228,255,0.75) 0%, rgba(217,228,255,0) 70%)",
-      s: "h-[50vmax] w-[50vmax] left-[15vw] -bottom-[15vmax]",
+      c: "radial-gradient(circle, rgba(217,228,255,0.8) 0%, rgba(217,228,255,0) 70%)",
+      s: "h-[54vmax] w-[54vmax] left-[10vw] top-[60vh]",
       x: [0, 60, 0],
-      y: [0, -70, 0],
+      y: [0, -60, 0],
+      p: p3,
+    },
+    {
+      c: "radial-gradient(circle, rgba(255,220,235,0.7) 0%, rgba(255,220,235,0) 70%)",
+      s: "h-[48vmax] w-[48vmax] right-[8vw] -bottom-[12vmax]",
+      x: [0, -50, 0],
+      y: [0, 50, 0],
+      p: p4,
     },
   ];
 
   return (
-    <motion.div
-      style={reduceMotion ? {} : { y: scrollShift }}
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
-      aria-hidden="true"
-    >
+    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
       {blobs.map((b, i) => (
         <motion.div
           key={i}
-          className={`absolute rounded-full blur-[100px] md:blur-[135px] ${b.s}`}
-          style={{ background: b.c }}
-          animate={reduceMotion ? {} : { x: b.x, y: b.y, scale: [1, 1.12, 1] }}
-          transition={{ duration: 18 + i * 4, repeat: Infinity, ease: "easeInOut" }}
-        />
+          style={reduceMotion ? {} : { y: b.p }}
+          className="absolute inset-0"
+        >
+          <motion.div
+            className={`absolute rounded-full blur-[90px] sm:blur-[120px] md:blur-[140px] gpu-layer ${b.s}`}
+            style={{ background: b.c }}
+            animate={reduceMotion ? {} : { x: b.x, y: b.y, scale: [1, 1.14, 1] }}
+            transition={{ duration: 16 + i * 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
       ))}
-    </motion.div>
+    </div>
   );
 }
 
@@ -415,29 +432,29 @@ function AppleDockItem({
   const [isHovered, setIsHovered] = useState(false);
   const reduceMotion = useReducedMotion();
 
-  // Calculate distance from mouse or touch X coordinate to item center
+  // Distance from pointer or touch X coordinate to item center
   const distance = useTransform(mouseX, (val) => {
     if (reduceMotion || !ref.current) return 1000;
     const bounds = ref.current.getBoundingClientRect();
     return val - (bounds.x + bounds.width / 2);
   });
 
-  // Apple Fisheye / Magnification wave curves (responsive on Phone, iPad & Mac)
-  const scaleSync = useTransform(distance, [-90, 0, 90], [1, 1.35, 1]);
-  const scale = useSpring(scaleSync, { mass: 0.1, stiffness: 260, damping: 15 });
+  // Responsive fish-eye curves (smooth 120Hz spring)
+  const scaleSync = useTransform(distance, [-75, 0, 75], [1, 1.28, 1]);
+  const scale = useSpring(scaleSync, { mass: 0.08, stiffness: 300, damping: 18 });
 
-  const ySync = useTransform(distance, [-90, 0, 90], [0, -10, 0]);
-  const y = useSpring(ySync, { mass: 0.1, stiffness: 260, damping: 15 });
+  const ySync = useTransform(distance, [-75, 0, 75], [0, -8, 0]);
+  const y = useSpring(ySync, { mass: 0.08, stiffness: 300, damping: 18 });
 
   return (
     <motion.a
       ref={ref}
       href={`#${id}`}
       style={reduceMotion ? {} : { scale, y }}
-      whileTap={{ scale: 0.86 }}
+      whileTap={{ scale: 0.88 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex h-11 w-11 items-center justify-center rounded-full transition-colors sm:h-12 sm:w-12"
+      className="group relative flex h-10 w-10 items-center justify-center rounded-full transition-colors sm:h-12 sm:w-12 gpu-layer"
       aria-label={label}
     >
       {/* Liquid active pill indicator */}
@@ -466,8 +483,7 @@ function AppleDockItem({
 
       <span className="relative z-10 flex items-center justify-center text-ink dark:text-ink-dark">
         <Icon
-          size={20}
-          className={`transition-all duration-200 ${
+          className={`h-4 w-4 transition-all duration-200 sm:h-5 sm:w-5 ${
             isActive
               ? "stroke-[2.4] text-ink dark:text-white"
               : "stroke-[1.8] opacity-70 group-hover:opacity-100"
@@ -479,7 +495,7 @@ function AppleDockItem({
       {isActive && (
         <motion.span
           layoutId="activeDockDot"
-          className="absolute bottom-1 h-1 w-1 rounded-full bg-[#8A5FD1] shadow-[0_0_6px_#8A5FD1] dark:bg-lav-dark dark:shadow-[0_0_8px_#9F83FF]"
+          className="absolute bottom-0.5 sm:bottom-1 h-1 w-1 rounded-full bg-[#8A5FD1] shadow-[0_0_8px_#8A5FD1] dark:bg-lav-dark dark:shadow-[0_0_10px_#9F83FF]"
           transition={{ type: "spring", stiffness: 450, damping: 30 }}
         />
       )}
@@ -503,7 +519,7 @@ function BottomNavbar({
   mounted: boolean;
 }) {
   const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 25 });
+  const scaleX = useSpring(scrollYProgress, { stiffness: 180, damping: 28 });
   const mouseX = useMotionValue(Infinity);
   const dockRef = useRef<HTMLDivElement>(null);
 
@@ -528,12 +544,14 @@ function BottomNavbar({
 
   return (
     <>
-      {/* Subtle Scroll Progress Indicator */}
-      <motion.div
-        style={{ scaleX }}
-        className="fixed inset-x-0 top-0 z-[80] h-[3px] origin-left bg-gradient-to-r from-lav via-[#8a5fd1] to-blush"
-        aria-hidden="true"
-      />
+      {/* Top Frosted Liquid Glass Reading Progress Bar with Glowing Tip */}
+      <div className="fixed inset-x-0 top-0 z-[120] pointer-events-none h-[3px] overflow-hidden bg-white/20 dark:bg-white/5 backdrop-blur-md">
+        <motion.div
+          style={{ scaleX }}
+          className="h-full origin-left bg-gradient-to-r from-lav via-[#8a5fd1] to-blush-dark shadow-[0_0_12px_rgba(138,95,209,0.85)] gpu-layer"
+          aria-hidden="true"
+        />
+      </div>
 
       {/* Minimal Apple Liquid Glass Dock - Strictly at the BOTTOM with Touch Magnify */}
       <nav
@@ -548,7 +566,7 @@ function BottomNavbar({
           if (e.touches[0]) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
         }}
         onTouchEnd={handlePointerLeave}
-        className="apple-dock-capsule fixed bottom-5 sm:bottom-8 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-1 sm:gap-1.5 rounded-full p-1.5 sm:p-2 shadow-2xl select-none"
+        className="apple-dock-capsule fixed bottom-3 sm:bottom-6 md:bottom-8 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-0.5 sm:gap-1.5 rounded-full p-1 sm:p-2 shadow-2xl select-none max-w-[calc(100vw-16px)] sm:max-w-none touch-pan-y gpu-layer"
         style={{
           marginBottom: "env(safe-area-inset-bottom)",
         }}
@@ -581,14 +599,14 @@ function BottomNavbar({
         })}
 
         {/* Vertical Apple Control Center Hairline Divider */}
-        <div className="mx-1 h-5 w-px bg-ink/15 dark:bg-white/15" />
+        <div className="mx-0.5 sm:mx-1 h-5 w-px bg-ink/15 dark:bg-white/15" />
 
         {/* Theme Toggle Button inside Dock with Magnetic spring */}
         <Magnetic pull={0.35}>
           <button
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full text-ink transition hover:scale-110 hover:bg-white/40 dark:text-ink-dark dark:hover:bg-white/10"
+            className="relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full text-ink transition hover:scale-110 hover:bg-white/40 dark:text-ink-dark dark:hover:bg-white/10"
           >
             {mounted && (
               <motion.div
@@ -599,9 +617,9 @@ function BottomNavbar({
                 transition={{ duration: 0.25 }}
               >
                 {theme === "dark" ? (
-                  <Sun size={19} className="text-amber-300 stroke-[2.2]" />
+                  <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-amber-300 stroke-[2.2]" />
                 ) : (
-                  <Moon size={19} className="stroke-[2.2]" />
+                  <Moon className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.2]" />
                 )}
               </motion.div>
             )}
@@ -647,10 +665,17 @@ function SlideToChat() {
 
   const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
     if (isSuccess) return;
-    if (info.offset.x >= maxDrag * 0.72) {
+    if (info.offset.x >= maxDrag * 0.7) {
       // Trigger iPhone Call Answer / Slide Action
       setIsSuccess(true);
       dragX.set(maxDrag);
+
+      // Mobile physical haptic feedback
+      if (typeof window !== "undefined" && "vibrate" in navigator) {
+        try {
+          navigator.vibrate([20, 40, 20]);
+        } catch {}
+      }
 
       const url = `https://wa.me/${c.whatsapp.phone}?text=${encodeURIComponent(
         c.whatsapp.defaultMessage
@@ -668,7 +693,7 @@ function SlideToChat() {
 
   return (
     <div className="w-full">
-      <div className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
+      <div className="mb-3 flex items-center justify-between text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
         <span className="flex items-center gap-1.5">
           <WhatsAppIcon className="h-4 w-4 text-emerald-500" /> Instant WhatsApp
         </span>
@@ -678,7 +703,7 @@ function SlideToChat() {
       {/* iPhone Slider Track */}
       <div
         ref={trackRef}
-        className="iphone-slider-track relative flex h-[62px] w-full select-none items-center overflow-hidden rounded-full p-1.5"
+        className="iphone-slider-track relative flex h-[60px] w-full select-none items-center overflow-hidden rounded-full p-1.5"
       >
         {/* Animated Green Trail following the Knob */}
         <motion.div
@@ -689,7 +714,7 @@ function SlideToChat() {
         {/* Shimmering "slide to chat" Text (Classic iPhone Shimmer) */}
         <motion.div
           style={{ opacity: textOpacity }}
-          className="iphone-shimmer-text pointer-events-none absolute inset-0 flex items-center justify-center gap-2 px-14 text-xs font-bold uppercase tracking-[0.25em] sm:text-sm"
+          className="iphone-shimmer-text pointer-events-none absolute inset-0 flex items-center justify-center gap-2 px-12 text-xs font-bold uppercase tracking-[0.25em] sm:text-sm"
         >
           <span>slide to chat</span>
           <ChevronsRight size={18} className="animate-pulse" />
@@ -703,10 +728,10 @@ function SlideToChat() {
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           animate={{ x: isSuccess ? maxDrag : undefined }}
-          style={{ x: dragX }}
+          style={{ x: dragX, touchAction: "none" }}
           whileDrag={{ scale: 1.08 }}
           transition={{ type: "spring", stiffness: 450, damping: 35 }}
-          className="relative z-10 flex h-[50px] w-[50px] cursor-grab items-center justify-center rounded-full bg-gradient-to-tr from-[#25D366] via-[#20BA5A] to-[#128C7E] text-white shadow-[0_6px_20px_rgba(37,211,102,0.45)] ring-2 ring-white/70 active:cursor-grabbing"
+          className="relative z-10 flex h-[48px] w-[48px] cursor-grab items-center justify-center rounded-full bg-gradient-to-tr from-[#25D366] via-[#20BA5A] to-[#128C7E] text-white shadow-[0_6px_20px_rgba(37,211,102,0.45)] ring-2 ring-white/70 active:cursor-grabbing gpu-layer"
         >
           {isSuccess ? (
             <motion.div
@@ -722,7 +747,7 @@ function SlideToChat() {
         </motion.div>
       </div>
 
-      <p className="mt-2 text-center text-[11px] font-medium text-ink-muted dark:text-ink-muted-dark">
+      <p className="mt-2 text-center text-[10px] sm:text-[11px] font-medium text-ink-muted dark:text-ink-muted-dark">
         {isSuccess ? "Opening WhatsApp chat..." : "Drag slider right to start WhatsApp chat"}
       </p>
     </div>
@@ -733,10 +758,11 @@ function SlideToChat() {
 function Hero() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const opacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
-  const heroBlur = useTransform(scrollYProgress, [0, 0.75], ["blur(0px)", "blur(14px)"]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.75], [1, 0.94]);
+  const yHeadline = useTransform(scrollYProgress, [0, 1], [0, 180]);
+  const yTagline = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const heroBlur = useTransform(scrollYProgress, [0, 0.7], ["blur(0px)", "blur(18px)"]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.7], [1, 0.93]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   // Live Local Time in Kerala (Asia/Kolkata)
   const [localTime, setLocalTime] = useState("");
@@ -766,20 +792,20 @@ function Hero() {
     <section
       id="home"
       ref={ref}
-      className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-5 pb-36 pt-24 md:px-10 lg:px-16"
+      className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-4 pb-36 pt-24 sm:px-8 md:px-12 lg:px-16"
     >
       <motion.div
-        style={{ y, opacity, filter: heroBlur, scale: heroScale }}
-        className="mx-auto w-full max-w-[1500px]"
+        style={{ opacity: heroOpacity, filter: heroBlur, scale: heroScale }}
+        className="mx-auto w-full max-w-[1500px] gpu-layer"
       >
         {/* Status badges */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease }}
-          className="mb-8 flex flex-wrap items-center gap-3"
+          className="mb-6 sm:mb-8 flex flex-wrap items-center gap-2.5 sm:gap-3"
         >
-          <span className="liquid-glass flex items-center gap-2.5 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-ink dark:text-ink-dark">
+          <span className="liquid-glass flex items-center gap-2 rounded-full px-3.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-ink dark:text-ink-dark">
             <span className="relative flex h-2 w-2">
               <span className="absolute h-2 w-2 animate-ping rounded-full bg-emerald-500 opacity-75" />
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -787,47 +813,50 @@ function Hero() {
             Available for new projects
           </span>
 
-          <span className="liquid-glass flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-ink-muted dark:text-ink-muted-dark">
+          <span className="liquid-glass flex items-center gap-2 rounded-full px-3.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-ink-muted dark:text-ink-muted-dark">
             <Clock size={12} className="text-lav dark:text-lav-dark" />
             {localTime || "Kerala, India"} • IST
           </span>
         </motion.div>
 
         {/* Display Typography */}
-        <h1 className="text-[clamp(3.4rem,15vw,13.5rem)] font-black uppercase leading-[0.85] tracking-tighter text-ink dark:text-ink-dark">
-          <motion.span
-            className="block bg-gradient-to-r from-ink via-[#7a4ec7] to-blush-dark bg-clip-text text-transparent dark:from-white dark:via-lav-dark dark:to-blush"
-            initial={{ y: "30%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease }}
-          >
-            {c.first}
-          </motion.span>
-          <motion.span
-            className="stroke-text block md:pl-[10vw]"
-            initial={{ y: "30%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.85, ease, delay: 0.1 }}
-          >
-            {c.last}
-          </motion.span>
-        </h1>
+        <motion.div style={{ y: yHeadline }}>
+          <h1 className="text-[clamp(2.75rem,13.5vw,13rem)] font-black uppercase leading-[0.88] tracking-tighter text-ink dark:text-ink-dark">
+            <motion.span
+              className="block bg-gradient-to-r from-ink via-[#7a4ec7] to-blush-dark bg-clip-text text-transparent dark:from-white dark:via-lav-dark dark:to-blush"
+              initial={{ y: "30%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, ease }}
+            >
+              {c.first}
+            </motion.span>
+            <motion.span
+              className="stroke-text block sm:pl-[6vw] md:pl-[8vw]"
+              initial={{ y: "30%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.85, ease, delay: 0.1 }}
+            >
+              {c.last}
+            </motion.span>
+          </h1>
+        </motion.div>
 
         {/* Tagline & Call to Actions */}
         <motion.div
+          style={{ y: yTagline }}
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease, delay: 0.2 }}
-          className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between"
+          className="mt-8 sm:mt-10 flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between"
         >
-          <p className="max-w-lg text-base font-medium leading-relaxed text-ink/80 dark:text-ink-dark/80 md:text-xl">
+          <p className="max-w-lg text-sm sm:text-base font-medium leading-relaxed text-ink/80 dark:text-ink-dark/80 md:text-xl">
             <span className="font-bold text-ink dark:text-ink-dark">{c.role}.</span> {c.tagline}
           </p>
           <div className="flex flex-wrap gap-3">
             <Magnetic>
               <a
                 href="#works"
-                className="rounded-full bg-ink px-8 py-4 text-xs font-bold uppercase tracking-widest text-white shadow-md transition hover:scale-105 hover:bg-ink/90 dark:bg-white dark:text-night-900 dark:hover:bg-white/90"
+                className="rounded-full bg-ink px-6 py-3.5 sm:px-8 sm:py-4 text-xs font-bold uppercase tracking-widest text-white shadow-md transition hover:scale-105 hover:bg-ink/90 dark:bg-white dark:text-night-900 dark:hover:bg-white/90"
               >
                 Explore works
               </a>
@@ -835,7 +864,7 @@ function Hero() {
             <Magnetic>
               <a
                 href="#contact"
-                className="liquid-glass rounded-full px-8 py-4 text-xs font-bold uppercase tracking-widest text-ink transition hover:scale-105 dark:text-ink-dark"
+                className="liquid-glass rounded-full px-6 py-3.5 sm:px-8 sm:py-4 text-xs font-bold uppercase tracking-widest text-ink transition hover:scale-105 dark:text-ink-dark"
               >
                 Get in touch
               </a>
@@ -843,17 +872,17 @@ function Hero() {
           </div>
         </motion.div>
 
-        {/* Elevated Frosted Liquid Glass Skills Marquee (Comfortably above bottom dock) */}
+        {/* Elevated Frosted Liquid Glass Skills Marquee */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease, delay: 0.35 }}
-          className="mt-14 w-full sm:mt-16"
+          className="mt-12 w-full sm:mt-16"
         >
-          <div className="liquid-glass relative mx-auto overflow-hidden rounded-full py-3.5 shadow-md [mask-image:linear-gradient(to_right,transparent_0%,black_12%,black_88%,transparent_100%)]">
-            <div className="flex w-max animate-marquee gap-8 text-xs font-bold uppercase tracking-[0.28em] text-ink/70 dark:text-ink-dark/70">
+          <div className="liquid-glass relative mx-auto overflow-hidden rounded-full py-3 sm:py-3.5 shadow-md [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
+            <div className="flex w-max animate-marquee gap-6 sm:gap-8 text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em] sm:tracking-[0.28em] text-ink/70 dark:text-ink-dark/70">
               {marqueeSkills.map((s, i) => (
-                <span key={`${s}-${i}`} className="flex items-center gap-8">
+                <span key={`${s}-${i}`} className="flex items-center gap-6 sm:gap-8">
                   <span>{s}</span>
                   <span className="text-lav dark:text-lav-dark text-[10px]">✦</span>
                 </span>
@@ -967,14 +996,14 @@ function Works() {
         </h2>
 
         {/* Category Filters */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex max-w-full gap-2 overflow-x-auto no-sb pb-1">
           {categories.map((cat) => {
             const isActive = category === cat.value;
             return (
               <button
                 key={cat.value}
                 onClick={() => setCategory(cat.value)}
-                className="relative rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-ink transition-colors dark:text-ink-dark"
+                className="relative shrink-0 rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-ink transition-colors dark:text-ink-dark"
               >
                 {isActive && (
                   <motion.span
@@ -1175,7 +1204,7 @@ function Experience() {
       <div ref={expRef} className="relative ml-3 border-l border-ink/15 pl-8 dark:border-ink-dark/20 md:ml-6 md:pl-14">
         {/* Scroll-Linked Glowing Laser Beam with blur glow */}
         <motion.div
-          className="absolute -left-[1px] top-0 w-[2.5px] origin-top bg-gradient-to-b from-lav via-[#8a5fd1] to-blush shadow-[0_0_12px_#8a5fd1] dark:shadow-[0_0_16px_#9F83FF]"
+          className="absolute -left-[1px] top-0 w-[2.5px] origin-top bg-gradient-to-b from-lav via-[#8a5fd1] to-blush shadow-[0_0_14px_#8a5fd1] dark:shadow-[0_0_18px_#9F83FF] gpu-layer"
           style={{ height: laserHeight }}
         />
 
@@ -1183,7 +1212,7 @@ function Experience() {
           <Reveal key={`${item.role}-${item.co}`} delay={i * 0.1} className="relative mb-8 last:mb-0">
             {/* Illuminated Milestone Node with blur glow */}
             <span
-              className="absolute -left-[41px] top-8 h-4 w-4 rounded-full border-4 border-white bg-lav shadow-[0_0_10px_rgba(138,95,209,0.5)] dark:border-night-900 dark:bg-lav-dark dark:shadow-[0_0_12px_rgba(159,131,255,0.7)] md:-left-[65px]"
+              className="absolute -left-[41px] top-8 h-4 w-4 rounded-full border-4 border-white bg-lav shadow-[0_0_12px_rgba(138,95,209,0.7)] dark:border-night-900 dark:bg-lav-dark dark:shadow-[0_0_16px_rgba(159,131,255,0.85)] md:-left-[65px] gpu-layer"
               aria-hidden="true"
             />
 
