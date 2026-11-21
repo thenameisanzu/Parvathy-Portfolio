@@ -18,8 +18,7 @@ body {
 
 /* GPU acceleration helper for butter-smooth 120Hz animations */
 .gpu-layer {
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -161,6 +160,9 @@ html.dark .liquid-glass::before {
 
 .apple-dock-capsule {
   touch-action: none;
+  left: 50%;
+  transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.86) 0%,
@@ -182,6 +184,9 @@ html.dark .liquid-glass::before {
 
 html.dark .apple-dock-capsule {
   touch-action: none;
+  left: 50%;
+  transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
   background: linear-gradient(
     135deg,
     rgba(36, 26, 58, 0.86) 0%,
