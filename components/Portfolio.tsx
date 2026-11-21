@@ -114,30 +114,37 @@ function useTheme() {
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const listener = (e: MediaQueryListEvent) => {
-      const stored = localStorage.getItem("pv_theme");
-      if (!stored) {
-        if (e.matches) {
-          document.documentElement.classList.add("dark");
-          setTheme("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-          setTheme("light");
+      try {
+        const stored = localStorage.getItem("pv_theme");
+        if (!stored) {
+          if (e.matches) {
+            document.documentElement.classList.add("dark");
+            setTheme("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+            setTheme("light");
+          }
         }
-      }
+      } catch {}
     };
     media.addEventListener("change", listener);
     return () => media.removeEventListener("change", listener);
   }, []);
 
   const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
+    const isCurrentlyDark = document.documentElement.classList.contains("dark");
+    const nextTheme = isCurrentlyDark ? "light" : "dark";
     setTheme(nextTheme);
     if (nextTheme === "dark") {
       document.documentElement.classList.add("dark");
-      localStorage.setItem("pv_theme", "dark");
+      try {
+        localStorage.setItem("pv_theme", "dark");
+      } catch {}
     } else {
       document.documentElement.classList.remove("dark");
-      localStorage.setItem("pv_theme", "light");
+      try {
+        localStorage.setItem("pv_theme", "light");
+      } catch {}
     }
   };
 
@@ -642,13 +649,22 @@ function BottomNavbar({
 
         {/* Theme Toggle Button inside Dock */}
         <button
-          onClick={toggleTheme}
-          onTouchEnd={(e) => {
+          type="button"
+          onClick={(e) => {
             e.stopPropagation();
             toggleTheme();
           }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+          }}
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          className="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-ink transition hover:scale-110 hover:bg-white/40 dark:text-ink-dark dark:hover:bg-white/10"
+          className="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-ink transition hover:scale-110 hover:bg-white/40 active:scale-95 dark:text-ink-dark dark:hover:bg-white/10"
         >
           {mounted && (
             <motion.div
