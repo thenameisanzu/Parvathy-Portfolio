@@ -853,6 +853,16 @@ function Hero() {
             Available for new projects
           </span>
 
+          <a
+            href="https://www.aethrasolutions.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="liquid-glass flex items-center gap-1.5 rounded-full px-3 py-1.5 sm:px-3.5 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-[#6b4fb8] transition hover:scale-105 hover:bg-white/60 dark:text-lav-dark dark:hover:bg-white/10"
+          >
+            <span>Aethra Digital Solutions</span>
+            <ExternalLink size={11} />
+          </a>
+
           <span className="liquid-glass flex items-center gap-2 rounded-full px-3 py-1.5 sm:px-3.5 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-ink-muted dark:text-ink-muted-dark">
             <Clock size={12} className="text-lav dark:text-lav-dark" />
             {localTime || "Kerala, India"} • IST
@@ -1256,9 +1266,21 @@ function Experience() {
             <SpotlightCard className="rounded-[1.75rem] p-4.5 sm:p-6 md:p-7">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold uppercase tracking-[0.25em] text-ink-muted dark:text-ink-muted-dark">
                 <span>{item.period}</span>
-                <span className="rounded-full bg-lav/20 px-3 py-1 text-[#6b4fb8] dark:bg-lav-dark/20 dark:text-lav-dark">
-                  {item.co}
-                </span>
+                {item.url ? (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full bg-lav/20 px-3 py-1 text-[#6b4fb8] transition hover:scale-105 hover:bg-lav/30 hover:underline dark:bg-lav-dark/20 dark:text-lav-dark dark:hover:bg-lav-dark/30"
+                  >
+                    <span>{item.co}</span>
+                    <ExternalLink size={10} />
+                  </a>
+                ) : (
+                  <span className="rounded-full bg-lav/20 px-3 py-1 text-[#6b4fb8] dark:bg-lav-dark/20 dark:text-lav-dark">
+                    {item.co}
+                  </span>
+                )}
               </div>
 
               <h3 className="mt-2 text-xl font-extrabold tracking-tight text-ink dark:text-ink-dark md:text-2xl">

@@ -34,6 +34,7 @@ export interface ProjectItem {
 export interface ExperienceItem {
   role: string;
   co: string;
+  url?: string;
   period: string;
   desc: string;
   highlights?: string[];
@@ -78,7 +79,7 @@ export interface PortfolioContent {
 export const c: PortfolioContent = {
   first: "Parvathy",
   last: "Vidhu",
-  role: "Full Stack Developer",
+  role: "Co-Founder & Full Stack Developer",
   location: "Kerala, India",
   timezone: "Asia/Kolkata",
   email: "hello@parvathyvidhu.dev",
@@ -87,8 +88,8 @@ export const c: PortfolioContent = {
     displayPhone: "+91 98765 43210",
     defaultMessage: "Hi Parvathy, I saw your portfolio and would love to chat!",
   },
-  tagline: "I build calm, fast, and thoughtful digital products for the modern web.",
-  bioSnippet: "Specialized in TypeScript, React, Next.js, and high-performance server architectures.",
+  tagline: "Co-Founder of Aethra Digital Solutions (aethrasolutions.in). Building calm, scalable, and high-performance digital products for the modern web.",
+  bioSnippet: "Co-Founder at Aethra Digital Solutions, specializing in TypeScript, React, Next.js, and scalable cloud architectures.",
   // Exactly 5 streamlined menus for the bottom dock
   nav: [
     { id: "home", label: "Home" },
@@ -100,9 +101,9 @@ export const c: PortfolioContent = {
   about: {
     headline: "Code crafted with a designer's aesthetic, engineered with architectural discipline.",
     body: [
-      "I am a full stack software engineer dedicated to building high-fidelity web experiences that bridge the gap between expressive user interfaces and resilient backend systems.",
-      "With a keen focus on performance, accessibility (WCAG), and responsive motion design, I take ideas from initial napkin sketches all the way to cloud-scale production.",
-      "When I am not designing interfaces or writing clean APIs, I contribute to open-source developer tooling, experiment with generative UI, and explore typographic craft.",
+      "I am the Co-Founder of Aethra Digital Solutions (aethrasolutions.in) and a full stack engineer dedicated to building high-fidelity web experiences that bridge the gap between expressive user interfaces and resilient backend systems.",
+      "Leading technical direction at Aethra, I focus on performance, accessibility (WCAG), and responsive motion design, taking ideas from initial napkin sketches all the way to cloud-scale production.",
+      "When I am not architecting digital solutions for clients or writing clean APIs, I contribute to open-source developer tooling, experiment with generative UI, and explore typographic craft.",
     ],
     stats: [
       { n: "3+", l: "Years Active" },
@@ -192,15 +193,17 @@ export const c: PortfolioContent = {
   ],
   experience: [
     {
-      role: "Full Stack Developer",
+      role: "Co-Founder & Tech Lead",
       co: "Aethra Digital Solutions",
+      url: "https://www.aethrasolutions.in",
       period: "2025 — Present",
-      desc: "Lead development of client-facing SaaS products, architecting resilient microservices and performant Next.js frontend applications.",
+      desc: "Co-founded Aethra Digital Solutions (aethrasolutions.in), driving product engineering, modern cloud architectures, and client-facing digital transformation.",
       highlights: [
+        "Architecting scalable web solutions and enterprise SaaS products for global clients.",
         "Reduced Core Web Vitals LCP by 42% across flagship client applications.",
         "Engineered end-to-end REST & GraphQL endpoints with automated CI/CD pipelines.",
       ],
-      skills: ["Next.js", "TypeScript", "Node.js", "PostgreSQL", "Docker"],
+      skills: ["Next.js", "TypeScript", "Node.js", "PostgreSQL", "Docker", "AWS"],
     },
     {
       role: "Frontend Engineer",
@@ -226,6 +229,7 @@ export const c: PortfolioContent = {
     },
   ],
   socials: [
+    { l: "Aethra Solutions", h: "https://www.aethrasolutions.in", ariaLabel: "Visit Aethra Digital Solutions website" },
     { l: "GitHub", h: "https://github.com", ariaLabel: "Visit Parvathy's GitHub Profile" },
     { l: "LinkedIn", h: "https://linkedin.com", ariaLabel: "Visit Parvathy's LinkedIn Profile" },
     { l: "X / Twitter", h: "https://twitter.com", ariaLabel: "Visit Parvathy's X (Twitter) Profile" },

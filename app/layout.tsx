@@ -4,13 +4,16 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://parvathyvidhu.dev"),
   title: {
-    default: "Parvathy Vidhu — Full Stack Developer",
+    default: "Parvathy Vidhu — Co-Founder of Aethra Digital Solutions & Full Stack Developer",
     template: "%s | Parvathy Vidhu",
   },
   description:
-    "Portfolio of Parvathy Vidhu, a Full Stack Developer crafting calm, fast, and beautiful web experiences. Explore selected projects, technical expertise, and journey.",
+    "Portfolio of Parvathy Vidhu, Co-Founder of Aethra Digital Solutions (aethrasolutions.in) and Full Stack Developer crafting calm, fast, and beautiful web experiences.",
   keywords: [
     "Parvathy Vidhu",
+    "Aethra Digital Solutions",
+    "aethrasolutions.in",
+    "Co-Founder Aethra Digital Solutions",
     "Full Stack Developer",
     "Frontend Developer",
     "React",
@@ -32,16 +35,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://parvathyvidhu.dev",
-    title: "Parvathy Vidhu — Full Stack Developer",
+    title: "Parvathy Vidhu — Co-Founder of Aethra Digital Solutions & Full Stack Developer",
     description:
-      "Crafting calm, fast, and beautiful digital products for the web with React, Next.js, and TypeScript.",
+      "Portfolio of Parvathy Vidhu, Co-Founder of Aethra Digital Solutions (aethrasolutions.in) and Full Stack Developer crafting calm, fast, and beautiful digital products.",
     siteName: "Parvathy Vidhu Portfolio",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Parvathy Vidhu — Full Stack Developer",
+    title: "Parvathy Vidhu — Co-Founder of Aethra Digital Solutions & Full Stack Developer",
     description:
-      "Crafting calm, fast, and beautiful digital products for the web with React, Next.js, and TypeScript.",
+      "Portfolio of Parvathy Vidhu, Co-Founder of Aethra Digital Solutions (aethrasolutions.in) and Full Stack Developer crafting calm, fast, and beautiful digital products.",
   },
   robots: {
     index: true,
